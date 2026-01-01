@@ -12,6 +12,7 @@ const emptyList = document.querySelector(".empty-list");
 const addBtn2 = document.getElementById("add-2");
 const contactPreview = document.querySelector(".contact-preview");
 const emptyPreview = document.querySelector(".empty-preview");
+const searchBtn = document.getElementById("search");
 
 let contactsArray = [];
 let editId = null;
@@ -45,7 +46,6 @@ function edit(e) {
 }
 
 function del(e) {
-  console.log("???");
   contactsArray.forEach((contact, index) => {
     if (`delete-${contact.id}` === e.target.id) {
       contactsArray.splice(index, 1);
@@ -53,6 +53,9 @@ function del(e) {
     }
   });
   alert("Contact has been deleted");
+  displayContacts();
+  contactPreview.querySelectorAll(".preview").forEach((el) => el.remove());
+  emptyPreview.classList.remove("hide");
 }
 
 function profilePicInit(name) {
@@ -64,14 +67,22 @@ function profilePicInit(name) {
   return init;
 }
 
-function displayContacts() {
-  if (!contactsArray) {
+function displayContacts(list = contactsArray, isSearch = false) {
+  contactsList.querySelectorAll(".contact").forEach((el) => el.remove());
+
+  if (!list.length) {
+    emptyList.innerHTML = isSearch
+      ? `No Results Found`
+      : `No contacts added yet.
+        <button id="add-2">Add your first Contact!</button>`;
+
+    emptyList.classList.remove("hide");
     return;
   }
 
   emptyList.classList.add("hide");
 
-  contactsArray.forEach((c) => {
+  list.forEach((c) => {
     const contact = document.createElement("button");
     contact.classList.add("contact");
 
@@ -103,7 +114,7 @@ function displayContacts() {
 function previewCard(c) {
   emptyPreview.classList.add("hide");
 
-  contactPreview.innerHTML = "";
+  contactPreview.querySelectorAll(".preview").forEach((el) => el.remove());
 
   let nameKey = c.querySelector("p").textContent;
   let phoneKey;
@@ -117,6 +128,9 @@ function previewCard(c) {
       return;
     }
   });
+
+  const preview = document.createElement("div");
+  preview.classList.add("preview");
 
   const profilePic = document.createElement("div");
   const initials = document.createElement("span");
@@ -163,11 +177,13 @@ function previewCard(c) {
   btnsWrapper.appendChild(edit);
   btnsWrapper.appendChild(del);
 
-  contactPreview.appendChild(profilePic);
-  contactPreview.appendChild(name);
-  contactPreview.appendChild(phone);
-  contactPreview.appendChild(iconWrapper);
-  contactPreview.appendChild(btnsWrapper);
+  preview.appendChild(profilePic);
+  preview.appendChild(name);
+  preview.appendChild(phone);
+  preview.appendChild(iconWrapper);
+  preview.appendChild(btnsWrapper);
+
+  contactPreview.appendChild(preview);
 }
 
 async function fetchContacts() {
@@ -241,6 +257,23 @@ addBtn2.addEventListener("click", () => {
   add();
 });
 
+searchBtn.addEventListener("click", () => {
+  if (!input.value.trim()) {
+    return;
+  }
+
+  const inputValue = input.value.trim().toLowerCase();
+
+  const filtered = contactsArray.filter((contact) => {
+    return (
+      contact.name.toLowerCase().includes(inputValue) ||
+      contact.no.toLowerCase().includes(inputValue)
+    );
+  });
+
+  displayContacts(filtered, true);
+});
+
 contactPreview.addEventListener("click", (e) => {
   if (e.target.classList.contains("edit-btn")) {
     edit(e);
@@ -274,6 +307,10 @@ formSubmit.addEventListener("submit", (e) => {
       pfp: profilePicInit(enterNameInput.value),
     };
 
+    displayContacts();
+    contactPreview.querySelectorAll(".preview").forEach((el) => el.remove());
+    emptyPreview.classList.remove("hide");
+
     syncUpdate(contactsArray[index]);
     editId = null;
 
@@ -287,6 +324,8 @@ formSubmit.addEventListener("submit", (e) => {
     };
 
     contactsArray.push(contact);
+    displayContacts();
+    console.log(contactsArray);
 
     syncContact(contact);
     alert("Contact has been saved!");
