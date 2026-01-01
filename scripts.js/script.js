@@ -14,6 +14,7 @@ const contactPreview = document.querySelector(".contact-preview");
 const emptyPreview = document.querySelector(".empty-preview");
 
 let contactsArray = [];
+let editId = null;
 
 function add(value) {
   addEditModal.classList.remove("hide");
@@ -29,6 +30,29 @@ function add(value) {
   } else {
     enterNameInput.value = value;
   }
+}
+
+function edit(e) {
+  addEditModal.classList.remove("hide");
+
+  contactsArray.forEach((contact) => {
+    if (`edit-${contact.id}` === e.target.id) {
+      editId = contact.id;
+      enterNameInput.value = contact.name;
+      enterNumberInput.value = contact.no;
+    }
+  });
+}
+
+function del(e) {
+  console.log("???");
+  contactsArray.forEach((contact, index) => {
+    if (`delete-${contact.id}` === e.target.id) {
+      contactsArray.splice(index, 1);
+      syncDelete(contact.id);
+    }
+  });
+  alert("Contact has been deleted");
 }
 
 function profilePicInit(name) {
@@ -85,12 +109,11 @@ function previewCard(c) {
   let phoneKey;
   let initKey;
 
-  console.log(nameKey);
-
   contactsArray.forEach((contact) => {
     if (contact.name === nameKey) {
       phoneKey = contact.no;
       initKey = contact.pfp;
+      idKey = contact.id;
       return;
     }
   });
@@ -130,9 +153,13 @@ function previewCard(c) {
   const btnsWrapper = document.createElement("div");
   btnsWrapper.classList.add("preview-btns-wrapper");
   const edit = document.createElement("button");
+  edit.id = `edit-${idKey}`;
+  edit.classList.add("edit-btn");
   edit.textContent = "Edit";
   const del = document.createElement("button");
   del.textContent = "Delete";
+  del.id = `delete-${idKey}`;
+  del.classList.add("delete-btn");
   btnsWrapper.appendChild(edit);
   btnsWrapper.appendChild(del);
 
@@ -152,7 +179,6 @@ async function fetchContacts() {
     const data = await res.json();
 
     contactsArray = data;
-    console.log(contactsArray);
     displayContacts();
   } catch (err) {
     console.error("No Data");
@@ -167,6 +193,33 @@ async function syncContact(contact) {
       body: JSON.stringify(contact),
     });
 
+    if (!res.ok) throw new Error();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function syncUpdate(contact) {
+  console.log(contact);
+  try {
+    console.log("PUT URL:", `http://localhost:3000/contacts/${contact.id}`);
+    const res = await fetch(`http://localhost:3000/contacts/${contact.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contact),
+    });
+
+    if (!res.ok) throw new Error();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function syncDelete(contact) {
+  try {
+    const res = await fetch(`http://localhost:3000/contacts/${contact}`, {
+      method: "DELETE",
+    });
     if (!res.ok) throw new Error();
   } catch (err) {
     console.error(err);
@@ -188,6 +241,16 @@ addBtn2.addEventListener("click", () => {
   add();
 });
 
+contactPreview.addEventListener("click", (e) => {
+  if (e.target.classList.contains("edit-btn")) {
+    edit(e);
+  }
+
+  if (e.target.classList.contains("delete-btn")) {
+    del(e);
+  }
+});
+
 closeBtn.addEventListener("click", () => {
   close();
 });
@@ -199,19 +262,37 @@ cancelBtn.addEventListener("click", () => {
 formSubmit.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const contact = {
-    id: Date.now(),
-    pfp: profilePicInit(enterNameInput.value),
-    name: enterNameInput.value,
-    no: enterNumberInput.value,
-  };
+  if (editId) {
+    const index = contactsArray.findIndex((c) => {
+      return c.id === editId;
+    });
 
-  contactsArray.push(contact);
+    contactsArray[index] = {
+      ...contactsArray[index],
+      name: enterNameInput.value,
+      no: enterNumberInput.value,
+      pfp: profilePicInit(enterNameInput.value),
+    };
 
-  syncContact(contact);
+    syncUpdate(contactsArray[index]);
+    editId = null;
+
+    alert("Contact has been updated!");
+  } else {
+    const contact = {
+      id: Date.now(),
+      pfp: profilePicInit(enterNameInput.value),
+      name: enterNameInput.value,
+      no: enterNumberInput.value,
+    };
+
+    contactsArray.push(contact);
+
+    syncContact(contact);
+    alert("Contact has been saved!");
+  }
 
   close();
-  alert("Contact has been saved!");
 });
 
 fetchContacts();

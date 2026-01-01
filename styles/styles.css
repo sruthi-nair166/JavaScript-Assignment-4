@@ -121,7 +121,8 @@ form {
 }
 
 .contact-list {
-  margin: 0 0.5rem;
+  margin-left: 0.5rem;
+  margin-right: 0.2rem;
   overflow-y: auto;
   height: 100%;
 }
@@ -180,4 +181,5 @@ form {
 .justify {
   display: flex;
   justify-content: space-between;
+  text-align: right;
 }
