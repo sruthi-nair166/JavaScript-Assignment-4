@@ -13,9 +13,33 @@ const addBtn2 = document.getElementById("add-2");
 const contactPreview = document.querySelector(".contact-preview");
 const emptyPreview = document.querySelector(".empty-preview");
 const searchBtn = document.getElementById("search");
+const mobilePreview = document.getElementById("mobile-preview");
+const closeBtnMobile = document.querySelector(".close-btn-mobile");
+const initialsMobile = document.querySelector(".initials-mobile");
+const nameMobile = document.querySelector(".name-mobile");
+const phoneMobile = document.querySelector(".phone-mobile");
+const editBtnMobile = document.querySelector(".edit-btn-mobile");
+const deleteBtnMobile = document.querySelector(".delete-btn-mobile");
 
 let contactsArray = [];
 let editId = null;
+
+const mobileQuery = window.matchMedia("(max-width: 769px)");
+
+function updateView(e) {
+  const isMobile = e.matches;
+
+  if (isMobile) {
+    contactPreview.classList.add("hide");
+    mobilePreview.classList.add("hide");
+  } else {
+    mobilePreview.classList.add("hide");
+    contactPreview.classList.remove("hide");
+  }
+}
+
+updateView(mobileQuery);
+mobileQuery.addEventListener("change", updateView);
 
 function add(value) {
   addEditModal.classList.remove("hide");
@@ -114,8 +138,6 @@ function displayContacts(list = contactsArray, isSearch = false) {
 function previewCard(c) {
   emptyPreview.classList.add("hide");
 
-  contactPreview.querySelectorAll(".preview").forEach((el) => el.remove());
-
   let nameKey = c.querySelector("p").textContent;
   let phoneKey;
   let initKey;
@@ -128,6 +150,22 @@ function previewCard(c) {
       return;
     }
   });
+
+  if (mobileQuery.matches) {
+    mobilePreview.classList.remove("hide");
+    mobilePreview.querySelectorAll(".preview").forEach((el) => el.remove());
+
+    initialsMobile.textContent = initKey;
+    nameMobile.textContent = `${nameKey}`;
+    phoneMobile.textContent = `${phoneKey}`;
+
+    editBtnMobile.id = !editBtnMobile.id && `edit-${idKey}`;
+    deleteBtnMobile.id = !deleteBtnMobile.id && `delete-${idKey}`;
+
+    return;
+  }
+
+  contactPreview.querySelectorAll(".preview").forEach((el) => el.remove());
 
   const preview = document.createElement("div");
   preview.classList.add("preview");
@@ -157,13 +195,6 @@ function previewCard(c) {
   phone.appendChild(phoneLabel);
   phone.appendChild(phoneValue);
 
-  const iconWrapper = document.createElement("div");
-  iconWrapper.classList.add("preview-icons-wrapper");
-  const call = document.createElement("button");
-  const videoCall = document.createElement("button");
-  iconWrapper.appendChild(call);
-  iconWrapper.appendChild(videoCall);
-
   const btnsWrapper = document.createElement("div");
   btnsWrapper.classList.add("preview-btns-wrapper");
   const edit = document.createElement("button");
@@ -180,7 +211,6 @@ function previewCard(c) {
   preview.appendChild(profilePic);
   preview.appendChild(name);
   preview.appendChild(phone);
-  preview.appendChild(iconWrapper);
   preview.appendChild(btnsWrapper);
 
   contactPreview.appendChild(preview);
@@ -286,6 +316,10 @@ contactPreview.addEventListener("click", (e) => {
 
 closeBtn.addEventListener("click", () => {
   close();
+});
+
+closeBtnMobile.addEventListener("click", () => {
+  mobilePreview.classList.add("hide");
 });
 
 cancelBtn.addEventListener("click", () => {
