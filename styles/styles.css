@@ -10,6 +10,7 @@ body {
   height: 100vh;
   display: flex;
   justify-content: center;
+  margin: 0 3rem;
 }
 
 main {
@@ -35,6 +36,7 @@ input {
 
 button {
   padding: 0.2rem 0.8rem;
+  cursor: pointer;
 }
 
 #add-edit-modal {
@@ -67,6 +69,13 @@ button {
   border-radius: 50%;
   border: 1px solid black;
   align-self: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pfp span {
+  font-size: 5rem;
 }
 
 form {
@@ -108,8 +117,7 @@ form {
   border: 1px solid black;
   margin: 1rem 0;
   height: 400px;
-  width: 100%;
-  max-width: 600px;
+  width: 600px;
 }
 
 .contact-list {
@@ -133,7 +141,43 @@ form {
 }
 
 .contact-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   border: 1px solid black;
   margin: 0.5rem 0.5rem 0.5rem 0;
   padding: 2rem;
+  min-height: 0;
+}
+
+.contact-preview .empty-preview {
+  text-align: center;
+}
+
+.pfp-small {
+  width: 150px;
+  margin-bottom: 0.5rem;
+}
+
+.pfp-small span {
+  font-size: 3rem;
+}
+
+.preview-icons-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.preview-btns-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.justify {
+  display: flex;
+  justify-content: space-between;
 }
